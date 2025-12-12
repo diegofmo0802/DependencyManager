@@ -174,8 +174,8 @@ cli.addCommand('output', output, { description: 'Sets the output path for a depe
 cli.addCommand('remove', remove, { description: 'Removes a dependency.', usage: 'remove <name_or_repo_url>' });
 cli.addCommand('uninstall', uninstall, { description: 'Uninstalls all or specific dependencies.', usage: 'uninstall [name...]' });
 try {
-    const command = process.argv[0];
-    const skip = command.trim().toLowerCase() == 'npx' ? 2 : 1;
+    // const command = process.argv[0];
+    const skip = 2; // command.trim().toLowerCase() == 'npx' ? 2 : 1;
     const [commandName, ...args] = process.argv.slice(skip);
 
     if (commandName) {
