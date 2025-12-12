@@ -1,0 +1,29 @@
+{
+  "name": "saml.dep-manager",
+  "description": "is a simple dependency manager based on github repositories",
+  "version": "1.0.0",
+  "main": "build/bin.js",
+  "type": "module",
+  "bin": {
+    "dep": "build/bin.js"
+  },
+  "scripts": {
+    "dev": "npx tsc --watch",
+    "build": "npx tsc",
+    "prepare": "npm run build"
+  },
+  "keywords": [],
+  "author": {
+    "name": "diegofmo0802",
+    "email": "diegofmo0802@gmail.com",
+    "url": "https://mysaml.com"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "saml.servercore": "^5.0.0-dev.9"
+  }
+}
