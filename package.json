@@ -12,13 +12,23 @@
     "build": "npx tsc",
     "prepare": "npm run build"
   },
-  "keywords": [],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/diegofmo0802/DependencyManager.git"
+  },
   "author": {
     "name": "diegofmo0802",
     "email": "diegofmo0802@gmail.com",
     "url": "https://mysaml.com"
   },
-  "license": "Apache-2.0",
+  "keywords": [ "dependency", "manager" ],
+  "files": [
+    "build",
+    ".gitignore",
+    "LICENCE",
+    "README.md"
+  ],
   "devDependencies": {
     "@types/node": "^24.10.1",
     "typescript": "^5.9.3"
