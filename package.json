@@ -1,7 +1,7 @@
 {
   "name": "saml.dep-manager",
   "description": "is a simple dependency manager based on github repositories",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "build/bin.js",
   "type": "module",
   "bin": {

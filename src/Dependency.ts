@@ -1,7 +1,12 @@
+/**
+ * @author diegofmo0802 <diegofmo0802@mysaml.com>
+ * @description Dependency utility.
+ * @license Apache-2.0
+ */
 import { promises as FS } from "fs";
 
 import Git from "./Git.js";
-import File from "File.js";
+import File from "./File.js";
 
 export class Dependency implements Dependency.Dependency {
     public static include: string[] = [ '*' ];

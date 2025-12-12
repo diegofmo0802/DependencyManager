@@ -1,3 +1,9 @@
+/**
+ * @author diegofmo0802 <diegofmo0802@mysaml.com>
+ * @description Utility to help with File operations.
+ * @license Apache-2.0
+ */
+
 import { promises as FS } from 'fs';
 
 import Validator from './Validator.js';
