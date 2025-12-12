@@ -1,6 +1,8 @@
+import { promises as FS } from "fs";
+
 import Dependency from './Dependency.js';
 
-export class DependencyValidator {
+export class Validator {
     /**
      * Validates the 'name' property.
      * @param name The 'name' property to validate.
@@ -65,6 +67,25 @@ export class DependencyValidator {
         this.validateBranch(data.branch);
         this.validateOut(data.out);
     }
+    /**
+     * Check if a file exists
+     * @param path Path to check
+     * @returns Promise<boolean>
+     */
+    protected async isFile(path: string): Promise<boolean> {
+        try {
+            const stats = await FS.stat(path);
+            return stats.isFile();
+        } catch { return false; }
+    }
+    /**
+     * Check if a file or folder exists
+     * @param path Path to check
+     * @returns Promise<boolean>
+     */
+    protected async exists(path: string): Promise<boolean> {
+        try { await FS.access(path); return true; } catch { return false; }
+    }
 }
 
-export default DependencyValidator;
+export default Validator;

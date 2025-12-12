@@ -6,9 +6,9 @@
  */
 
 import Dependency from './Dependency.js';
-import DependencyFile from './DependencyFile.js';
+import File from './File.js';
 import DebugUI from './DebugUI.js';
-import DependencyValidator from './DependencyValidator.js';
+import Validator from './Validator.js';
 
 const dependencyFile = 'dep.mysaml.json';
 
@@ -27,15 +27,15 @@ async function add(this: DebugUI, command: string, args: string[]): Promise<void
         this.out.info(`&C(255,180,220)╭─────────────────────────────────────────────`);
         const [repo, name] = args;
         this.out.info(`&C(255,180,220)│ Adding dependency...`);
-        DependencyValidator.validateRepo(repo);
-        const dependencies = await DependencyFile.load(dependencyFile);
+        Validator.validateRepo(repo);
+        const dependencies = await File.load(dependencyFile);
         const dependencyName = name || getRepoName(repo);
-        DependencyValidator.validateName(dependencyName);
+        Validator.validateName(dependencyName);
      
         if (dependencies.some(dep => dep.name === dependencyName)) throw new Error(`A dependency with the name "${dependencyName}" already exists.`);
     
         const newDep: Dependency.Dependency = { name: dependencyName, repo };
-        await DependencyFile.save(dependencyFile, [...dependencies, newDep]);
+        await File.save(dependencyFile, [...dependencies, newDep]);
         this.out.info(`&C(255,180,220)│ Added dependency "${dependencyName}".`);
     } catch (error) { this.out.error(`&C(255,180,220)│ &C1${error}`); }
     finally { this.out.info(`&C(255,180,220)╰─────────────────────────────────────────────`); }
@@ -46,10 +46,10 @@ async function remove(this: DebugUI, command: string, args: string[]): Promise<v
         this.out.info(`&C(255,180,220)╭─────────────────────────────────────────────`);
         const [identifier] = args;
         if (!identifier) throw new Error('Usage: dep remove <name_or_repo_url>');
-        const dependencies = await DependencyFile.load(dependencyFile);
+        const dependencies = await File.load(dependencyFile);
         const updatedDependencies = dependencies.filter(dep => dep.name !== identifier && dep.repo !== identifier);
         if (dependencies.length === updatedDependencies.length) throw new Error(`Dependency "${identifier}" not found.`);
-        await DependencyFile.save(dependencyFile, updatedDependencies);
+        await File.save(dependencyFile, updatedDependencies);
         this.out.info(`&C(255,180,220)│ Removed dependency "${identifier}".`);
     } catch (error) { this.out.error(`&C(255,180,220)│ &C1${error}`); }
     finally { this.out.info(`&C(255,180,220)╰─────────────────────────────────────────────`); }
@@ -60,7 +60,7 @@ async function output(this: DebugUI, command: string, args: string[]): Promise<v
         this.out.info(`&C(255,180,220)╭─────────────────────────────────────────────`);
         const [identifier, output, source] = args;
         if (!identifier || !output) throw new Error('Usage: dep output <name_or_repo_url> <output_path> <source_path>');
-        const dependencies = await DependencyFile.load(dependencyFile);
+        const dependencies = await File.load(dependencyFile);
         const dependency = dependencies.find(dep => dep.name === identifier || dep.repo === identifier);
         if (!dependency) throw new Error(`Dependency "${identifier}" not found.`);
         
@@ -100,7 +100,7 @@ async function output(this: DebugUI, command: string, args: string[]): Promise<v
                 else if (Array.isArray(current)) dependency.out[source] = [...current, output];
             }
         }
-        await DependencyFile.save(dependencyFile, dependencies);
+        await File.save(dependencyFile, dependencies);
         this.out.info(`&C(255,180,220)│ Updated dependency output from &C4${identifier}`);
     } catch (error) { this.out.error(`&C(255,180,220)│ &C1${error}`); }
     finally { this.out.info(`&C(255,180,220)╰─────────────────────────────────────────────`); }
@@ -109,7 +109,7 @@ async function output(this: DebugUI, command: string, args: string[]): Promise<v
 async function install(this: DebugUI, command: string, args: string[]): Promise<void> {
     try {
         this.out.info(`&C(255,180,220)╭─────────────────────────────────────────────`);
-        const dependencies = await DependencyFile.load(dependencyFile)
+        const dependencies = await File.load(dependencyFile)
         const toInstall = args.length > 0
             ? dependencies.filter(dep => args.includes(dep.name) || args.includes(dep.repo))
             : dependencies;
@@ -132,7 +132,7 @@ async function install(this: DebugUI, command: string, args: string[]): Promise<
 async function uninstall(this: DebugUI, command: string, args: string[]): Promise<void> {
     try {
         this.out.info(`&C(255,180,220)╭─────────────────────────────────────────────`);
-        const dependencies = await DependencyFile.load(dependencyFile);
+        const dependencies = await File.load(dependencyFile);
         const toUninstall = args.length > 0
             ? dependencies.filter(dep => args.includes(dep.name) || args.includes(dep.repo))
             : dependencies;
@@ -152,7 +152,7 @@ async function uninstall(this: DebugUI, command: string, args: string[]): Promis
 }
 
 async function list(this: DebugUI): Promise<void> {
-    const dependencies: Dependency.Dependency[] = await DependencyFile.load(dependencyFile);
+    const dependencies: Dependency.Dependency[] = await File.load(dependencyFile);
     if (dependencies.length === 0) {
         this.out.info('No dependencies found.');
         return;

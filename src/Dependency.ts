@@ -1,6 +1,7 @@
 import { promises as FS } from "fs";
 
 import Git from "./Git.js";
+import File from "File.js";
 
 export class Dependency implements Dependency.Dependency {
     public static include: string[] = [ '*' ];
@@ -30,7 +31,7 @@ export class Dependency implements Dependency.Dependency {
      * @returns Promise<void>
      */
     public async clone(options: Dependency.manageOptions = {}): Promise<string> {
-        if (await this.exists(this.folder)) {
+        if (await File.exists(this.folder)) {
             if (!options.force) return await this.pull();
             else await this.uninstall();
         }
@@ -74,7 +75,7 @@ export class Dependency implements Dependency.Dependency {
             const out = typeof this.out === 'string' ? [ this.out ] : this.out ?? [];
             const folders: string[] = [ this.folder, ...Dependency.getAllOutFolders(out) ];
             for (const folder of folders) {
-                if (!await this.exists(folder)) continue;
+                if (!await File.exists(folder)) continue;
                 output.push(`Removing &C4${folder}`);
                 await FS.rm(folder, { recursive: true });
             }
@@ -93,12 +94,12 @@ export class Dependency implements Dependency.Dependency {
         source = Dependency.getSourcePath(this.folder, source);
         for (const folder of destination) {
             try {
-                if (!await this.exists(source)) throw new Error(`Source path ${source} does not exist.`);
-                if (!await this.exists(folder)) {
-                    if (!await this.isFile(source)) await FS.mkdir(folder, { recursive: true });
+                if (!await File.exists(source)) throw new Error(`Source path ${source} does not exist.`);
+                if (!await File.exists(folder)) {
+                    if (!await File.isFile(source)) await FS.mkdir(folder, { recursive: true });
                     else {
                         const toCreate = folder.slice(0, folder.lastIndexOf('/'));
-                        if (!await this.exists(toCreate)) await FS.mkdir(toCreate, { recursive: true });
+                        if (!await File.exists(toCreate)) await FS.mkdir(toCreate, { recursive: true });
                     }
                 }
                 output.push(`&RMoving source &C4${source} &Rto &C4${folder}`);
@@ -106,25 +107,6 @@ export class Dependency implements Dependency.Dependency {
             } catch (error) { throw new Error(`Failed to move files from ${this.name} to ${folder}, \n${error}`); }
         }
         return output;
-    }
-    /**
-     * Check if a file exists
-     * @param path Path to check
-     * @returns Promise<boolean>
-     */
-    protected async isFile(path: string): Promise<boolean> {
-        try {
-            const stats = await FS.stat(path);
-            return stats.isFile();
-        } catch { return false; }
-    }
-    /**
-     * Check if a file or folder exists
-     * @param path Path to check
-     * @returns Promise<boolean>
-     */
-    protected async exists(path: string): Promise<boolean> {
-        try { await FS.access(path); return true; } catch { return false; }
     }
     /**
      * Get the source path of a dependency

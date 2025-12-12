@@ -1,16 +1,16 @@
 import { promises as FS } from 'fs';
 
-import DependencyValidator from './DependencyValidator.js';
+import Validator from './Validator.js';
 import Dependency from './Dependency.js';
 
-export class DependencyFile {
+export class File {
     /**
      * Validates and transforms raw data into a DependencyDef object.
      * @param data - The raw data to extract from.
      * @returns A valid DependencyDef object.
      */
     private static extractDependency(data: any): Dependency.Dependency {
-        DependencyValidator.validateDependency(data);
+        Validator.validateDependency(data);
         return data;
     }
     /**
@@ -61,6 +61,25 @@ export class DependencyFile {
             } catch (error) { throw new Error(`Failed to write dependency file at &C2${path}&R.`, { cause: error }); }
         } catch (error) { throw error; }
     }
+    /**
+     * Check if a file exists
+     * @param path Path to check
+     * @returns Promise<boolean>
+     */
+    public static async isFile(path: string): Promise<boolean> {
+        try {
+            const stats = await FS.stat(path);
+            return stats.isFile();
+        } catch { return false; }
+    }
+    /**
+     * Check if a file or folder exists
+     * @param path Path to check
+     * @returns Promise<boolean>
+     */
+    public static async exists(path: string): Promise<boolean> {
+        try { await FS.access(path); return true; } catch { return false; }
+    }
 }
 
-export default DependencyFile;
+export default File;
