@@ -20,6 +20,8 @@ export class File {
      */
     private static async read(path: string): Promise<any> {
         try {
+            if (!await this.exists(path)) await FS.writeFile(path, '[]');
+            if (!await this.isFile(path)) throw new Error(`Dependency file at &C2${path}&R does not exist.`);
             const content = await FS.readFile(path, 'utf-8');
             return JSON.parse(content);
         } catch (error) {
