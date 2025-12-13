@@ -21,6 +21,16 @@ const getRepoName = (repo: string) => {
     const match = repo.match(/\/([^/]+\.git)$/);
     return match ? match[1].replace('.git', '') : null;
 };
+/**
+ * Appends a value to an array or string.
+ * @param current - The current value.
+ * @param value - The value to append.
+ */
+function appendValue(current: string | string[] | undefined, value: string): string | string[] {
+    if (!current) return value;
+    if (typeof current === 'string') return [current, value];
+    return [...current, value];
+};
 
 async function add(this: DebugUI, command: string, args: string[]): Promise<void> {
     try {
@@ -64,42 +74,23 @@ async function output(this: DebugUI, command: string, args: string[]): Promise<v
         const dependency = dependencies.find(dep => dep.name === identifier || dep.repo === identifier);
         if (!dependency) throw new Error(`Dependency "${identifier}" not found.`);
         
-        if (!dependency.out) {
-            if (!source) dependency.out = output;
-            else {
-                dependency.out = {};
-                dependency.out[source] = output;
-            }
-        } else if (typeof dependency.out === 'string') {
-            if (!source) {
-                const current = dependency.out;
-                dependency.out = [];
-                dependency.out.push(current, output);
-            } else {
-                const current = dependency.out;
-                dependency.out = {};
-                dependency.out[source] = output;
-                dependency.out['/'] = current;
-            } 
-        } else if (Array.isArray(dependency.out)) {
-            if (!source) dependency.out.push(output);
-            else {
-                const current = dependency.out;
-                dependency.out = {};
-                dependency.out[source] = output;
-                dependency.out['/'] = current;;
-            }
+        let out = dependency.out;
+
+        if (!out) out = source ? { [source]: output } : output;
+        else if (typeof out === 'string') {
+            if (!source) out = appendValue(out, output);
+            else if (source === '/') out = { '/': appendValue(out, output) };
+            else out = { [source]: output, '/': out };
+        } else if (Array.isArray(out)) {
+            if (!source) out = appendValue(out, output);
+            else if (source === '/') out = { '/': appendValue(out, output) };
+            else out = { [source]: output, '/': out };
         } else {
-            if (!source) {
-                const current = dependency.out['/'];
-                if (typeof current === 'string') dependency.out['/'] = [current, output];
-                else if (Array.isArray(current)) dependency.out['/'] = [...current, output];
-            } else {
-                const current = dependency.out[source];
-                if (typeof current === 'string') dependency.out[source] = [current, output];
-                else if (Array.isArray(current)) dependency.out[source] = [...current, output];
-            }
+            const key = source || '/';
+            out[key] = appendValue(out[key], output);
         }
+
+        dependency.out = out;
         await File.save(dependencyFile, dependencies);
         this.out.info(`&C(255,180,220)│ Updated dependency output from &C4${identifier}`);
     } catch (error) { this.out.error(`&C(255,180,220)│ &C1${error}`); }
